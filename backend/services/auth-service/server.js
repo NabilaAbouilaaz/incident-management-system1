@@ -4,12 +4,11 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const axios = require('axios');
+const { startEurekaClient } = require('../../eureka-client');
 
 const app = express();
 const PORT = 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'gestinc_secret_2026';
-const REGISTRY_URL = 'http://localhost:8761';
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -64,21 +63,7 @@ app.post('/api/auth/login', (req, res) => {
 
 app.get('/api/auth/health', (req, res) => res.json({ status: 'UP', service: 'auth-service', port: PORT }));
 
-async function register() {
-  try {
-    await axios.post(`${REGISTRY_URL}/eureka/apps/AUTH-SERVICE`, {
-      instance: { instanceId: `auth-service:${PORT}`, app: 'AUTH-SERVICE', hostName: 'localhost', port: PORT, status: 'UP' }
-    });
-    console.log('✅ [Auth] Enregistré dans le Registry');
-  } catch { console.warn('[Auth] Registry non disponible'); }
-}
-
-async function heartbeat() {
-  try { await axios.put(`${REGISTRY_URL}/eureka/apps/AUTH-SERVICE/auth-service:${PORT}`); } catch {}
-}
-
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`🔐 Auth Service démarré sur http://localhost:${PORT}`);
-  await register();
-  setInterval(heartbeat, 30000);
+  startEurekaClient('AUTH-SERVICE', PORT, '/api/auth/health');
 });

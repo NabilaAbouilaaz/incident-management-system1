@@ -3,12 +3,11 @@ const cors = require('cors');
 const Database = require('better-sqlite3');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const axios = require('axios');
+const { startEurekaClient } = require('../../eureka-client');
 
 const app = express();
 const PORT = 3005;
 const JWT_SECRET = process.env.JWT_SECRET || 'gestinc_secret_2026';
-const REGISTRY_URL = 'http://localhost:8761';
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -57,21 +56,7 @@ app.post('/api/incidents/:id/comments', auth, (req, res) => {
 
 app.get('/api/comments/health', (req, res) => res.json({ status: 'UP', service: 'comment-service', port: PORT }));
 
-async function register() {
-  try {
-    await axios.post(`${REGISTRY_URL}/eureka/apps/COMMENT-SERVICE`, {
-      instance: { instanceId: `comment-service:${PORT}`, app: 'COMMENT-SERVICE', hostName: 'localhost', port: PORT, status: 'UP' }
-    });
-    console.log('✅ [Comment] Enregistré dans le Registry');
-  } catch { console.warn('[Comment] Registry non disponible'); }
-}
-
-async function heartbeat() {
-  try { await axios.put(`${REGISTRY_URL}/eureka/apps/COMMENT-SERVICE/comment-service:${PORT}`); } catch {}
-}
-
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`💬 Comment Service démarré sur http://localhost:${PORT}`);
-  await register();
-  setInterval(heartbeat, 30000);
+  startEurekaClient('COMMENT-SERVICE', PORT, '/api/comments/health');
 });
