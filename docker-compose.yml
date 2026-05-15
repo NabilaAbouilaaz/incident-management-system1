@@ -1,10 +1,28 @@
 version: '3.8'
 
 services:
+
+  # ── Keycloak IAM ────────────────────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: gestinc-keycloak
+    command: start-dev
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin123
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ── Service Registry (Eureka) ────────────────────────────────────────────────
   registry:
     build:
       context: ./backend/registry
-      dockerfile: Dockerfile
     container_name: gestinc-registry
     ports:
       - "8761:8761"
@@ -15,10 +33,21 @@ services:
       timeout: 10s
       retries: 3
 
+  # ── Config Service (Spring Cloud Config equivalent) ──────────────────────────
+  config-service:
+    build:
+      context: ./backend/config-service
+    container_name: gestinc-config
+    ports:
+      - "8888:8888"
+    depends_on:
+      - registry
+    restart: unless-stopped
+
+  # ── API Gateway ──────────────────────────────────────────────────────────────
   gateway:
     build:
       context: ./backend/gateway
-      dockerfile: Dockerfile
     container_name: gestinc-gateway
     ports:
       - "5000:5000"
@@ -26,12 +55,13 @@ services:
       - REGISTRY_URL=http://registry:8761
     depends_on:
       - registry
+      - config-service
     restart: unless-stopped
 
+  # ── Auth Service ─────────────────────────────────────────────────────────────
   auth-service:
     build:
       context: ./backend/services/auth-service
-      dockerfile: Dockerfile
     container_name: gestinc-auth
     ports:
       - "3001:3001"
@@ -42,12 +72,13 @@ services:
       - db_data:/app/data
     depends_on:
       - registry
+      - config-service
     restart: unless-stopped
 
+  # ── Incident Service ─────────────────────────────────────────────────────────
   incident-service:
     build:
       context: ./backend/services/incident-service
-      dockerfile: Dockerfile
     container_name: gestinc-incidents
     ports:
       - "3002:3002"
@@ -58,12 +89,13 @@ services:
       - db_data:/app/data
     depends_on:
       - registry
+      - config-service
     restart: unless-stopped
 
+  # ── User Service ─────────────────────────────────────────────────────────────
   user-service:
     build:
       context: ./backend/services/user-service
-      dockerfile: Dockerfile
     container_name: gestinc-users
     ports:
       - "3003:3003"
@@ -74,12 +106,13 @@ services:
       - db_data:/app/data
     depends_on:
       - registry
+      - config-service
     restart: unless-stopped
 
+  # ── Chat Service ─────────────────────────────────────────────────────────────
   chat-service:
     build:
       context: ./backend/services/chat-service
-      dockerfile: Dockerfile
     container_name: gestinc-chat
     ports:
       - "3004:3004"
@@ -90,8 +123,40 @@ services:
       - db_data:/app/data
     depends_on:
       - registry
+      - config-service
     restart: unless-stopped
 
+  # ── Comment Service ──────────────────────────────────────────────────────────
+  comment-service:
+    build:
+      context: ./backend/services/comment-service
+    container_name: gestinc-comments
+    ports:
+      - "3005:3005"
+    environment:
+      - JWT_SECRET=gestinc_secret_2026
+      - REGISTRY_URL=http://registry:8761
+    volumes:
+      - db_data:/app/data
+    depends_on:
+      - registry
+      - config-service
+    restart: unless-stopped
+
+  # ── Notification Service ─────────────────────────────────────────────────────
+  notification-service:
+    build:
+      context: ./backend/services/notification-service
+    container_name: gestinc-notifications
+    ports:
+      - "3006:3006"
+    environment:
+      - REGISTRY_URL=http://registry:8761
+    depends_on:
+      - registry
+    restart: unless-stopped
+
+  # ── Frontend React ───────────────────────────────────────────────────────────
   frontend:
     build: ./frontend
     container_name: gestinc-frontend

@@ -1,0 +1,12 @@
+{
+  "name": "gestinc-config-service",
+  "version": "1.0.0",
+  "description": "Service de configuration centralisée (Spring Cloud Config équivalent) pour GestInc",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  }
+}
