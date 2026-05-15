@@ -1,0 +1,11 @@
+{
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, .gitignore",
+    "docker-compose.yml": "Dockerfile, .dockerignore"
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
+}
