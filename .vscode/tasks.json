@@ -2,16 +2,56 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "🚀 Démarrer Backend",
+      "label": "🔍 Démarrer Registry (port 8761)",
       "type": "shell",
       "command": "node server.js",
-      "options": { "cwd": "${workspaceFolder}/backend" },
-      "presentation": {
-        "label": "Backend (port 5000)",
-        "group": "GestInc",
-        "panel": "dedicated",
-        "reveal": "always"
-      },
+      "options": { "cwd": "${workspaceFolder}/backend/registry" },
+      "presentation": { "label": "Registry (8761)", "panel": "dedicated", "reveal": "always" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Démarrer Gateway (port 5000)",
+      "type": "shell",
+      "command": "node server.js",
+      "options": { "cwd": "${workspaceFolder}/backend/gateway" },
+      "presentation": { "label": "Gateway (5000)", "panel": "dedicated", "reveal": "always" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🔐 Démarrer Auth Service (port 3001)",
+      "type": "shell",
+      "command": "node server.js",
+      "options": { "cwd": "${workspaceFolder}/backend/services/auth-service" },
+      "presentation": { "label": "Auth (3001)", "panel": "dedicated", "reveal": "always" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "📋 Démarrer Incident Service (port 3002)",
+      "type": "shell",
+      "command": "node server.js",
+      "options": { "cwd": "${workspaceFolder}/backend/services/incident-service" },
+      "presentation": { "label": "Incidents (3002)", "panel": "dedicated", "reveal": "always" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "👥 Démarrer User Service (port 3003)",
+      "type": "shell",
+      "command": "node server.js",
+      "options": { "cwd": "${workspaceFolder}/backend/services/user-service" },
+      "presentation": { "label": "Users (3003)", "panel": "dedicated", "reveal": "always" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "💬 Démarrer Chat Service (port 3004)",
+      "type": "shell",
+      "command": "node server.js",
+      "options": { "cwd": "${workspaceFolder}/backend/services/chat-service" },
+      "presentation": { "label": "Chat (3004)", "panel": "dedicated", "reveal": "always" },
       "isBackground": true,
       "problemMatcher": []
     },
@@ -20,26 +60,24 @@
       "type": "shell",
       "command": "npm run dev",
       "options": { "cwd": "${workspaceFolder}/frontend" },
-      "presentation": {
-        "label": "Frontend (port 5173)",
-        "group": "GestInc",
-        "panel": "dedicated",
-        "reveal": "always"
-      },
+      "presentation": { "label": "Frontend (5173)", "panel": "dedicated", "reveal": "always" },
       "isBackground": true,
       "problemMatcher": []
     },
     {
-      "label": "▶️ Démarrer GestInc (Backend + Frontend)",
-      "dependsOn": ["🚀 Démarrer Backend", "⚡ Démarrer Frontend"],
+      "label": "▶️ Démarrer GestInc (Microservices + Frontend)",
+      "dependsOn": [
+        "🔍 Démarrer Registry (port 8761)",
+        "🌐 Démarrer Gateway (port 5000)",
+        "🔐 Démarrer Auth Service (port 3001)",
+        "📋 Démarrer Incident Service (port 3002)",
+        "👥 Démarrer User Service (port 3003)",
+        "💬 Démarrer Chat Service (port 3004)",
+        "⚡ Démarrer Frontend"
+      ],
       "dependsOrder": "parallel",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always"
-      },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always" },
       "problemMatcher": []
     }
   ]
